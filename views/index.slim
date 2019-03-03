@@ -1,0 +1,72 @@
+h1 PIGGY
+
+p This is a proof of concept page for PIGInABox, which is hooked up to an 
+  Authorize.net sandbox. 
+
+form#cc
+  input type='numeric' name='cardNumber' id='cardNumber' placeholder='CC#'
+  input type='numeric' name='expMonth' id='expMonth' placeholder='MM'
+  input type='numeric' name='expYear' id='expYear' placeholder='YYYY'
+  input type='numeric' name='cardCode' id='cardCode' placecholder='CVC'
+  input type='hidden' name='amount' id='amount' value='75.00'
+  input type='hidden' name='customerEmail' id='customerEmail' value='unclemikey@gmail.com'
+  input type='hidden' name='orderDetails' id='orderDetails' value='1 Adult Membership'
+  button type='button' onclick='sendToAnet()' GIMME DA CASH
+
+a class="btn btn-primary" href='/' Start Over
+javascript:
+  function paymentFormUpdate(opaqueData) {
+    $.ajax({
+      method: 'POST',
+      url: '/api/v1/payments',
+      data:  {
+        opaqueData,
+        amount: $('#amount').val(),
+        customerEmail: $('#customerEmail').val(),
+        orderDetails: $('#orderDetails').val()
+      }
+    }).done(function(data) {
+      console.log(data);
+      $('#transaction-result').text(data.messages[0].description);
+    })
+
+
+    document.getElementById("cardNumber").value = "";
+    document.getElementById("expMonth").value = "";
+    document.getElementById("expYear").value = "";
+    document.getElementById("cardCode").value = "";
+  }
+
+  function responseHandler(response) {
+    console.log(response);
+    if (response.messages.resultCode === "Error") {
+      var i = 0;
+      while (i < response.messages.message.length) {
+        $('#transaction-error').text(
+          response.messages.message[i].code + ": " +
+          response.messages.message[i].text
+        );
+        i = i + 1;
+      }
+    } else {
+      paymentFormUpdate(response.opaqueData);
+    }
+  }
+
+  function sendToAnet() {
+    var authData = {}
+    authData.clientKey = "#{ENV['ANET_PUBLIC_KEY']}";
+    authData.apiLoginID = "#{ENV['ANET_LOGIN_ID']}";
+
+    var cardData = {};
+    cardData.cardNumber = document.getElementById("cardNumber").value;
+    cardData.month = document.getElementById("expMonth").value;
+    cardData.year = document.getElementById("expYear").value;
+    cardData.cardCode = document.getElementById("cardCode").value;
+
+    var secureData = {};
+    secureData.authData = authData;
+    secureData.cardData = cardData;
+    
+		Accept.dispatchData(secureData, responseHandler);
+  }
