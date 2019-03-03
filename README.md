@@ -3,9 +3,21 @@ Simple Payment Integration Gateway. Proof of Concept. No Warranty
 
 This simple Sinatra service does one thing -- accept a payment request and verify it against Authorize.net.
 
+Any Ruby 2.x should suffice. You will also need `ngrok` to set up a tunnel if you're running this locally. Because Authorize.net is stupid, you must run this in such a way that you can call it via https, even if you're just running it locally. For testing purposes, use ngrok.io to set up a tunnel and hit the page that way.
+
+To prepare:
+
+```
+bundle install
+```
+
 You must create a `.env` file based on `.env-example` with your Authorize.net keys. If running to test it, use your sandbox keys!
 
-Because Authorize.net is stupid, you must run this in such a way that you can call it via https, even if you're just running it locally. For testing purposes, use ngrok.io to set up a tunnel and hit the page that way.
+To run:
+```
+ngrok http 4567 # in a window by itself. Note the https URL it generates!
+ruby pig_in_a_box.rb
+```
 
 Right now this responds to exactly two endpoints:
 
