@@ -38,6 +38,7 @@ def process_response(response)
         @message = "Successful charge AUTH: #{response.transactionResponse.authCode}"
         retVal[:authCode] = response.transactionResponse.authCode
         retVal[:responseCode] = response.transactionResponse.responseCode
+        retVal[:accountNumber] = response.transactionResponse.accountNumber
         retVal[:messages] = response.transactionResponse.messages.messages.collect do |m|
           {
             code: m.code,
